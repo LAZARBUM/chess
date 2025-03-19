@@ -160,14 +160,21 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
         Square endSquare = (Square) this.getComponentAt(new Point(e.getX(), e.getY()));
     
         // Check if the move is legal
+        if ((currPiece.getColor() && !whiteTurn) || (!currPiece.getColor() && whiteTurn)) {
+            fromMoveSquare.setDisplay(true);
+            currPiece = null;
+            repaint();
+            return;
+        }
+    
         ArrayList<Square> legalMoves = currPiece.getLegalMoves(this, fromMoveSquare);
-        
+    
         if (legalMoves.contains(endSquare)) {
-            endSquare.put(currPiece); // Move piece to new location
-            fromMoveSquare.removePiece(); // Clear previous square
-            whiteTurn = !whiteTurn; // Switch turns
+            endSquare.put(currPiece);
+            fromMoveSquare.removePiece();
+            whiteTurn = !whiteTurn; // Switch turns only on a successful move
         } else {
-            fromMoveSquare.put(currPiece); // Snap back if illegal
+            fromMoveSquare.put(currPiece);
         }
     
         fromMoveSquare.setDisplay(true);

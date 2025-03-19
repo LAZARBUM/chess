@@ -91,6 +91,9 @@ public class Piece {
   
 // returns a list of legal moves for this piece.
 // this piece moves like a knight and a king combined.
+// It can move in an L-shape like a knight (2 squares in one direction and 1 in another).
+// It can also move one square in any direction like a king.
+// It can capture an opponent's piece if it lands on an occupied square.
 // precondition: board[][] must be initialized, start must be a valid square
 // postcondition: returns all legal moves based on movement rules
     public ArrayList<Square> getLegalMoves(Board b, Square start) {
