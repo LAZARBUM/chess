@@ -4,7 +4,7 @@ import javax.imageio.ImageIO;
 
 //NAME: Nailah George
 //PIECE NAME: widow (pawn)
-//DESCRIPTION:  a widow that moves and attacks every 2 squares in front and behind it if the space is available
+//DESCRIPTION: A widow that moves and attacks every 2 squares in front and behind it if the space is available
 //(if it's not occupied by its own color)
 
 public class Pawn extends Piece {
@@ -29,22 +29,28 @@ public class Pawn extends Piece {
         int row = start.getRow();
         int col = start.getCol();
 
-        int direction = this.getColor() ? -1 : 1;  // White moves up (-1), Black moves down (+1)
+        // widow attacks 2 rows ahead and behind (if not occupied by own color)
+        int[] attackOffsets = {-2, 2};  // Attack 2 squares ahead and behind
 
-        // Attacking diagonally one square ahead in both directions
-        int[][] attackOffsets = {
-            {direction, -1}, {direction, 1}
-        };
+        for (int offset : attackOffsets) {
+            int newRow = row + offset;
 
-        for (int[] offset : attackOffsets) {
-            int newRow = row + offset[0];
-            int newCol = col + offset[1];
+            // Check if the target square is within bounds
+            if (newRow >= 0 && newRow < 8) {
+                Square target = board[newRow][col];
 
-            // Ensure within board boundaries
-            if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-                controlledSquares.add(board[newRow][newCol]);
+                if (target.isOccupied()) {
+                    // If the piece is an opponent's piece, it's controlled
+                    if (target.getOccupyingPiece().getColor() != this.getColor()) {
+                        controlledSquares.add(target); // Enemy piece
+                    }
+                } else {
+                    // If the square is empty, it's still controlled
+                    controlledSquares.add(target); 
+                }
             }
         }
+
         return controlledSquares;
     }
 
@@ -56,38 +62,19 @@ public class Pawn extends Piece {
         int row = start.getRow();
         int col = start.getCol();
 
-        int direction = this.getColor() ? -1 : 1;  // White moves up (-1), Black moves down (+1)
+        // widow moves 2 squares forward or 2 squares backward if not blocked by own color
+        int[] moveOffsets = {-2, 2};  // Moves 2 squares forward or backward
 
-        // Regular move one square forward
-        int[][] moveOffsets = {
-            {direction, 0}  // Move one square forward
-        };
+        for (int offset : moveOffsets) {
+            int newRow = row + offset;
 
-        // Check for standard one-square moves
-        for (int[] offset : moveOffsets) {
-            int newRow = row + offset[0];
-            int newCol = col + offset[1];
+            // Check if the move is within bounds
+            if (newRow >= 0 && newRow < 8) {
+                Square target = b.getSquareArray()[newRow][col];
 
-            if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-                Square targetSquare = b.getSquareArray()[newRow][newCol];
-
-                if (!targetSquare.isOccupied()) {
-                    moves.add(targetSquare);
-                }
-            }
-        }
-
-        // Check for the initial two-square move
-        if (row == (this.getColor() ? 6 : 1)) {  // Starting row for white is 6, black is 1
-            int[] doubleMoveOffset = {direction * 2, 0};
-            int newRow = row + doubleMoveOffset[0];
-            int newCol = col + doubleMoveOffset[1];
-
-            if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-                Square targetSquare = b.getSquareArray()[newRow][newCol];
-
-                if (!targetSquare.isOccupied()) {
-                    moves.add(targetSquare);
+                // Check if the target is unoccupied or contains an opponent's piece
+                if (!target.isOccupied() || target.getOccupyingPiece().getColor() != this.getColor()) {
+                    moves.add(target); // Move or capture
                 }
             }
         }
@@ -97,6 +84,6 @@ public class Pawn extends Piece {
 
     @Override
     public String toString() {
-        return this.getColor() ? "white pawn" : "black pawn";
+        return this.getColor() ? "white widow" : "black widow";
     }
 }

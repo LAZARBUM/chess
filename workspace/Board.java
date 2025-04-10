@@ -141,6 +141,56 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
         }
     }
 
+    public boolean isInCheck(boolean kingColor) {
+        // Traverse the board to find the king of the specified color
+        Square kingSquare = null;
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Square square = board[i][j]; // Directly access the 2D array
+                Piece piece = square.getOccupyingPiece();
+    
+                // Look for the king
+                if (piece instanceof King && piece.getColor() == kingColor) {
+                    kingSquare = square;
+                    break;
+                }
+            }
+            if (kingSquare != null) {
+                break; // Exit the outer loop once we've found the king
+            }
+        }
+    
+        if (kingSquare == null) {
+            // If we didn't find the king (which shouldn't happen), return false
+            return false;
+        }
+    
+        // Traverse the board looking for opponent's pieces
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Square square = board[i][j]; // Directly access the 2D array
+                Piece piece = square.getOccupyingPiece();
+    
+                // Only consider the opponent's pieces
+                if (piece != null && piece.getColor() != kingColor) {
+                    // Get the squares controlled by this piece
+                    ArrayList<Square> controlledSquares = piece.getControlledSquares(board, square);
+    
+                    // If the king's square is in the controlled squares, the king is in check
+                    if (controlledSquares.contains(kingSquare)) {
+                        return true;
+                    }
+                }
+            }
+        }
+    
+        // If no opponent's piece can attack the king, return false
+        return false;
+    }
+
+
+
+
     @Override
     public void mousePressed(MouseEvent e) {
         currX = e.getX();
@@ -172,7 +222,6 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
 
         Square endSquare = (Square) this.getComponentAt(new Point(e.getX(), e.getY()));
 
-        // Check if the move is legal
         if ((currPiece.getColor() && !whiteTurn) || (!currPiece.getColor() && whiteTurn)) {
             fromMoveSquare.setDisplay(true);
             currPiece = null;
@@ -180,12 +229,21 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
             return;
         }
 
+        // Get all the legal moves for the current piece
         ArrayList<Square> legalMoves = currPiece.getLegalMoves(this, fromMoveSquare);
 
         if (legalMoves.contains(endSquare)) {
+            // Temporarily make the move on the board
             endSquare.put(currPiece);
             fromMoveSquare.removePiece();
-            whiteTurn = !whiteTurn; // Switch turns only on a successful move
+
+            // check if the move would put the  king in check
+            if (isInCheck(currPiece.getColor())) {
+                fromMoveSquare.put(currPiece);
+                endSquare.removePiece();
+            } else {
+                whiteTurn = !whiteTurn;
+            }
         } else {
             fromMoveSquare.put(currPiece);
         }
