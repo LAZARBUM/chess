@@ -156,12 +156,11 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
                 }
             }
             if (kingSquare != null) {
-                break; // Exit the outer loop once we've found the king
+                break; // Exit the outer loop once w found the king
             }
         }
     
         if (kingSquare == null) {
-            // If we didn't find the king (which shouldn't happen), return false
             return false;
         }
     
@@ -212,8 +211,8 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
         repaint();
     }
 
-    // Should move the piece to the desired location only if this is a legal move.
-    // Uses the piece's "legal move" function to determine if the move is valid.
+    // should move the piece to the desired location only if this is a legal move.
+    // uses the piece's "legal move" function to determine if the move is valid.
     @Override
     public void mouseReleased(MouseEvent e) {
         if (currPiece == null || fromMoveSquare == null) {
@@ -229,18 +228,26 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
             return;
         }
 
-        // Get all the legal moves for the current piece
+        // get all the legal moves for the current piece
         ArrayList<Square> legalMoves = currPiece.getLegalMoves(this, fromMoveSquare);
 
         if (legalMoves.contains(endSquare)) {
-            // Temporarily make the move on the board
+            // save the piece currently on the end squar
+            Piece capturedPiece = endSquare.getOccupyingPiece();
+    
+            // temporarily make the move on the board
             endSquare.put(currPiece);
             fromMoveSquare.removePiece();
-
-            // check if the move would put the  king in check
+    
+            // check if the move would pt the king in check
             if (isInCheck(currPiece.getColor())) {
+                // rndo the move put piece back where it came from
                 fromMoveSquare.put(currPiece);
                 endSquare.removePiece();
+                // eestore the carptured piece if there was one
+                if (capturedPiece != null) {
+                    endSquare.put(capturedPiece);
+                }
             } else {
                 whiteTurn = !whiteTurn;
             }
